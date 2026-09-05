@@ -16,11 +16,12 @@ class BackupWorker(context: Context) {
         executor.execute {
             state.setStatus(jobId, BackupStatus.UPLOADING)
             val result = try {
-                kotlinx.coroutines.runBlocking { transport.upload(file) }
+                transport.upload(file).getOrThrow()
+                true
             } catch (_: Exception) {
-                Result.failure<Unit>(IllegalStateException("Backup failed"))
+                false
             }
-            val status = if (result.isSuccess) BackupStatus.UPLOADED else BackupStatus.FAILED
+            val status = if (result) BackupStatus.UPLOADED else BackupStatus.FAILED
             state.setStatus(jobId, status)
             onComplete(status)
         }

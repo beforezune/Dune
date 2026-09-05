@@ -17,8 +17,9 @@ class TelegramSettings : Activity() {
         val save = Button(this).apply {
             text = "Save Telegram settings"
             setOnClickListener {
-                val ok = store.save(token.text.toString().trim(), chat.text.toString().trim())
-                status.text = if (ok) "Telegram configuration saved." else "Enter both values."
+                runCatching { store.save(token.text.toString().trim(), chat.text.toString().trim()) }
+                    .onSuccess { status.text = "Telegram configuration saved." }
+                    .onFailure { status.text = it.message ?: "Enter both values." }
             }
         }
         val clear = Button(this).apply {
